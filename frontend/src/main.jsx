@@ -9,7 +9,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from './context/AuthContext.jsx';
 
 // TODO: Ganti dengan Client ID Google milik kelompokmu
-const GOOGLE_CLIENT_ID = "MASUKKAN_CLIENT_ID_GOOGLE_DI_SINI.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
