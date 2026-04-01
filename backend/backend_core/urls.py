@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from .views import ThemeUpdateView
+from .views import ThemeUpdateView, GoogleLoginView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,4 +24,7 @@ urlpatterns = [
     
     # Endpoint API untuk fitur ganti tema
     path('api/update-theme/', ThemeUpdateView.as_view(), name='update-theme'),
+
+    # Endpoint untuk login via React
+    path('api/auth/google/', GoogleLoginView.as_view(), name='google_login'),
 ]
