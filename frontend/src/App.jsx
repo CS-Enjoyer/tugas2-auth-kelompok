@@ -4,13 +4,10 @@ import { AuthContext } from './context/AuthContext';
 import BioGrid from './components/BioGrid';
 import ThemeEditor from './components/ThemeEditor';
 import './styles/GlobalStyles.css';
-import './App.css';
 
 function App() {
-  // Mengambil state dan fungsi dari AuthContext
   const { user, loginWithGoogle, logout, loading } = useContext(AuthContext);
 
-  // Initialize CSS Variables dari backend theme
   useEffect(() => {
     if (user && user.theme) {
       const { primary_color, primary_bg, primary_text, font_family } = user.theme;
@@ -21,11 +18,8 @@ function App() {
     }
   }, [user]);
 
-  // Fungsi yang dipanggil saat Google berhasil memberikan token
   const handleSuccess = async (credentialResponse) => {
     console.log("1. Token dari Google diterima!");
-    
-    // Kirim token tersebut ke backend Django via Context
     const success = await loginWithGoogle(credentialResponse.credential);
     
     if (success) {
@@ -39,7 +33,7 @@ function App() {
     console.log('Login Google Gagal');
   };
 
-  // Jangan render apa-apa sampai pengecekan sesi selesai
+  // Tampilan saat pertama kali dimuat (mengecek sesi)
   if (loading) {
     return (
       <div style={styles.loadingContainer}>
@@ -53,14 +47,11 @@ function App() {
       {/* Header */}
       <header style={styles.header}>
         <div style={styles.headerContent}>
-          <h1 style={styles.title}>📚 Tugas PKPL - Kelompok</h1>
+          <h1 style={styles.title}>🎭 Tugas PKPL - Kelompok</h1>
           {user && (
             <div style={styles.userInfo}>
               <span>👤 {user.name || user.email}</span>
-              <button 
-                onClick={logout}
-                style={styles.logoutBtn}
-              >
+              <button onClick={logout} style={styles.logoutBtn}>
                 Logout
               </button>
             </div>
@@ -70,85 +61,39 @@ function App() {
 
       {/* Main Content */}
       <main style={styles.main}>
-        {/* Jika belum login (user === null) */}
+        {/* Jika belum login */}
         {!user ? (
           <div style={styles.loginSection}>
             <div style={styles.loginCard}>
-              <h2>🔐 Silakan Login</h2>
+              <h2>🔒 Silakan Login</h2>
               <p style={styles.loginDescription}>
                 Login menggunakan akun Google untuk melihat biodata kelompok dan mengakses fitur lainnya.
               </p>
-              <GoogleLogin 
-                onSuccess={handleSuccess} 
-                onError={handleError} 
-              />
-            </div>
-
-            {/* Biodata Preview (tanpa fitur ThemeEditor) */}
-            <BioGrid />
-
-            {/* Testing Button */}
-            <div style={styles.testingSection}>
-              <button 
-                onClick={() => {
-                  const dummyUser = { 
-                    name: "admin", 
-                    email: "bypass@gmail.com", 
-                    is_member: true
-                  };
-                  localStorage.setItem('user_data', JSON.stringify(dummyUser));
-                  localStorage.setItem('access_token', 'token_palsu_123');
-                  window.location.reload();
-                }}
-                style={styles.testingBtn}
-              >
-                🛠️ Test Login (Admin/Member)
-              </button>
-              <button 
-                onClick={() => {
-                  const dummyUser = { 
-                    name: "visitor", 
-                    email: "guest@gmail.com", 
-                    is_member: false
-                  };
-                  localStorage.setItem('user_data', JSON.stringify(dummyUser));
-                  localStorage.setItem('access_token', 'token_palsu_123');
-                  window.location.reload();
-                }}
-                style={styles.testingBtn}
-              >
-                🛠️ Test Login (Guest)
-              </button>
+              <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
             </div>
           </div>
         ) : (
-          /* Jika SUDAH login */
-          <div style={styles.dashboardContainer}>
-            {/* Status & Introduction */}
-            <div style={styles.statusCard}>
-              <h2>👋 Selamat datang, {user.name || user.email}!</h2>
-              <p>Email: {user.email}</p>
-
-              {user.is_member ? (
-                <div style={styles.memberStatus}>
-                  <h3>✓ Status: Anggota Kelompok</h3>
-                  <p>Anda memiliki akses penuh kepada semua fitur, termasuk editor tema.</p>
-                </div>
-              ) : (
-                <div style={styles.guestStatus}>
-                  <h3>👤 Status: Pengunjung</h3>
-                  <p>Anda dapat melihat biodata kelompok namun tidak dapat mengubah tema.</p>
-                </div>
-              )}
-            </div>
-
-            {/* Biodata Grid - ditampilkan untuk semua user */}
-            <BioGrid />
-
-            {/* Theme Editor - hanya untuk members */}
-            {user.is_member && <ThemeEditor />}
+          /* Jika sudah login, cek status role-nya */
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
+            {user.is_member ? (
+              <div style={styles.memberStatus}>
+                <h3>✔️ Status: Anggota Kelompok</h3>
+                <p>Anda memiliki akses penuh kepada semua fitur, termasuk editor tema.</p>
+              </div>
+            ) : (
+              <div style={styles.guestStatus}>
+                <h3>👤 Status: Pengunjung</h3>
+                <p>Anda dapat melihat biodata kelompok namun tidak dapat mengubah tema.</p>
+              </div>
+            )}
           </div>
         )}
+
+        {/* Biodata Grid - Ditampilkan untuk semua user */}
+        <BioGrid />
+
+        {/* Theme Editor - HANYA ditampikan jika user adalah member kelompok */}
+        {user?.is_member && <ThemeEditor />}
       </main>
 
       {/* Footer */}
@@ -159,21 +104,31 @@ function App() {
   );
 }
 
-// ===== Styles =====
+// ----- Styles -----
+// (Saya buatkan ulang full styling-nya agar tampilan UI dari temanmu tetap rapi 
+// saat kamu copy-paste keseluruhan file ini)
 const styles = {
   appContainer: {
     minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',
-    backgroundColor: 'var(--primary-bg)',
-    color: 'var(--primary-text)',
-    fontFamily: 'var(--font-family)',
+    fontFamily: 'var(--font-family, sans-serif)',
+    backgroundColor: 'var(--primary-bg, #121212)',
+    color: 'var(--primary-text, #ffffff)',
   },
+  loadingContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100vh',
+    backgroundColor: '#121212',
+    color: '#fff',
+  },
+  loadingText: { fontSize: '1.2rem' },
   header: {
-    backgroundColor: 'var(--primary-color)',
-    color: 'white',
-    padding: 'var(--spacing-lg)',
-    boxShadow: 'var(--box-shadow)',
+    backgroundColor: '#1e1e1e',
+    padding: '1rem 2rem',
+    borderBottom: '1px solid #333',
   },
   headerContent: {
     display: 'flex',
@@ -181,108 +136,56 @@ const styles = {
     alignItems: 'center',
     maxWidth: '1200px',
     margin: '0 auto',
-    width: '100%',
   },
-  title: {
-    fontSize: 'var(--font-size-xl)',
-    fontWeight: '700',
-    margin: 0,
-  },
-  userInfo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 'var(--spacing-md)',
-    color: 'white',
-  },
+  title: { margin: 0, fontSize: '1.5rem' },
+  userInfo: { display: 'flex', alignItems: 'center', gap: '1rem' },
   logoutBtn: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    padding: '8px 16px',
+    backgroundColor: '#dc3545',
     color: 'white',
-    padding: 'var(--spacing-xs) var(--spacing-md)',
-    border: '1px solid white',
-    borderRadius: 'var(--border-radius)',
+    border: 'none',
+    borderRadius: '4px',
     cursor: 'pointer',
-    transition: 'all 0.3s ease',
+    fontWeight: 'bold'
   },
   main: {
     flex: 1,
-    padding: 'var(--spacing-lg)',
+    padding: '2rem',
     maxWidth: '1200px',
     margin: '0 auto',
     width: '100%',
+    boxSizing: 'border-box',
   },
-  loadingContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '100vh',
-    backgroundColor: 'var(--primary-bg)',
-  },
-  loadingText: {
-    fontSize: 'var(--font-size-lg)',
-    color: 'var(--primary-color)',
-    fontWeight: '600',
-  },
-  loginSection: {
-    width: '100%',
-  },
+  loginSection: { display: 'flex', justifyContent: 'center', marginTop: '3rem', marginBottom: '3rem' },
   loginCard: {
-    backgroundColor: 'var(--accent-bg)',
-    border: `2px solid var(--primary-color)`,
-    borderRadius: 'var(--border-radius)',
-    padding: 'var(--spacing-lg)',
-    marginBottom: 'var(--spacing-lg)',
+    backgroundColor: '#1e1e1e',
+    padding: '2.5rem',
+    borderRadius: '8px',
+    border: '1px solid #333',
     textAlign: 'center',
+    maxWidth: '400px',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
   },
-  loginDescription: {
-    marginBottom: 'var(--spacing-md)',
-    color: '#666',
-  },
-  dashboardContainer: {
-    width: '100%',
-  },
-  statusCard: {
-    backgroundColor: 'var(--accent-bg)',
-    border: `1px solid var(--primary-color)`,
-    borderRadius: 'var(--border-radius)',
-    padding: 'var(--spacing-lg)',
-    marginBottom: 'var(--spacing-lg)',
-  },
+  loginDescription: { color: '#aaa', marginBottom: '2rem' },
   memberStatus: {
-    backgroundColor: '#e8f5e9',
-    border: '1px solid #4CAF50',
-    borderRadius: 'var(--border-radius)',
-    padding: 'var(--spacing-md)',
-    marginTop: 'var(--spacing-md)',
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+    border: '1px solid #4caf50',
+    padding: '1rem',
+    borderRadius: '8px',
   },
   guestStatus: {
-    backgroundColor: '#fff3e0',
+    backgroundColor: 'rgba(255, 152, 0, 0.1)',
     border: '1px solid #ff9800',
-    borderRadius: 'var(--border-radius)',
-    padding: 'var(--spacing-md)',
-    marginTop: 'var(--spacing-md)',
-  },
-  testingSection: {
-    display: 'flex',
-    gap: 'var(--spacing-md)',
-    justifyContent: 'center',
-    marginTop: 'var(--spacing-lg)',
-    flexWrap: 'wrap',
-  },
-  testingBtn: {
-    backgroundColor: '#333',
-    color: 'white',
-    padding: 'var(--spacing-sm) var(--spacing-md)',
-    border: '1px dashed #777',
-    borderRadius: 'var(--border-radius)',
-    cursor: 'pointer',
-    transition: 'all 0.3s ease',
+    padding: '1rem',
+    borderRadius: '8px',
   },
   footer: {
-    backgroundColor: 'var(--primary-color)',
-    color: 'white',
     textAlign: 'center',
-    padding: 'var(--spacing-md)',
-    marginTop: 'auto',
+    padding: '1rem',
+    backgroundColor: '#1e1e1e',
+    borderTop: '1px solid #333',
+    fontSize: '0.9rem',
+    color: '#888',
   },
 };
 

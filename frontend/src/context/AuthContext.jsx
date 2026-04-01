@@ -7,7 +7,6 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Cek apakah ada sesi tersimpan saat aplikasi pertama dimuat
     useEffect(() => {
         const storedUser = localStorage.getItem('user_data');
         const token = localStorage.getItem('access_token');
@@ -17,26 +16,25 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }, []);
 
-    // Fungsi login ini dipanggil SETELAH berhasil mendapatkan token dari Google
     const loginWithGoogle = async (googleCredential) => {
         try {
-            // PENTING: Koordinasi dengan Role 2 untuk memastikan URL endpoint ini benar
-            // Kita mengirim token Google ke Django untuk divalidasi
             const response = await axiosInstance.post('/api/auth/google/', {
+                id_token: googleCredential,
                 access_token: googleCredential
             });
-
-            // Asumsi response dari Django mengembalikan token JWT internal dan data user
-            const { access_token, user_info } = response.data;
-
-            // Simpan token untuk authentikasi request selanjutnya
-            localStorage.setItem('access_token', access_token);
-            localStorage.setItem('user_data', JSON.stringify(user_info));
             
-            setUser(user_info);
+            console.log("Respon dari Django:", response.data);
+            
+            const token = response.data.access || response.data.key || response.data.access_token;
+            const userInfo = response.data.user || response.data.user_info || {};
+
+            localStorage.setItem('access_token', token);
+            localStorage.setItem('user_data', JSON.stringify(userInfo));
+            
+            setUser(userInfo);
             return true;
         } catch (error) {
-            console.error("Gagal verifikasi token ke backend:", error);
+            console.error("Gagal verifikasi token ke backend:", error.response?.data || error);
             return false;
         }
     };
