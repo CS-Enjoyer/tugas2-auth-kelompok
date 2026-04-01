@@ -1,14 +1,25 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { AuthContext } from './context/AuthContext';
-import './App.css';
+import BioGrid from './components/BioGrid';
+import ThemeEditor from './components/ThemeEditor';
+import './styles/GlobalStyles.css';
 
 function App() {
   const { user, loginWithGoogle, logout, loading } = useContext(AuthContext);
 
+  useEffect(() => {
+    if (user && user.theme) {
+      const { primary_color, primary_bg, primary_text, font_family } = user.theme;
+      if (primary_color) document.documentElement.style.setProperty('--primary-color', primary_color);
+      if (primary_bg) document.documentElement.style.setProperty('--primary-bg', primary_bg);
+      if (primary_text) document.documentElement.style.setProperty('--primary-text', primary_text);
+      if (font_family) document.documentElement.style.setProperty('--font-family', font_family);
+    }
+  }, [user]);
+
   const handleSuccess = async (credentialResponse) => {
     console.log("1. Token dari Google diterima!");
-    
     const success = await loginWithGoogle(credentialResponse.credential);
     
     if (success) {
@@ -22,72 +33,160 @@ function App() {
     console.log('Login Google Gagal');
   };
 
-  if (loading) return <div>Memuat data pengguna...</div>;
+  // Tampilan saat pertama kali dimuat (mengecek sesi)
+  if (loading) {
+    return (
+      <div style={styles.loadingContainer}>
+        <p style={styles.loadingText}>⏳ Memuat data pengguna...</p>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>Tugas PKPL - Kelompok</h1>
-      
-      {!user ? (
-        <div style={{ border: '1px solid #ccc', padding: '1rem', borderRadius: '8px' }}>
-          <h2>Silakan Login</h2>
-          <p>Login menggunakan akun Google UI atau pribadi Anda.</p>
-          <GoogleLogin 
-            onSuccess={handleSuccess} 
-            onError={handleError} 
-          />
-        </div>
-      ) : (
-        <div style={{ border: '1px solid #4CAF50', padding: '1rem', borderRadius: '8px' }}>
-          <h2>Selamat datang, {user.name || user.email}!</h2>
-          <p>Email: {user.email}</p>
-          
-          {user.is_member ? (
-            <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#e8f5e9' }}>
-              <h3>🎨 Panel Editor Tema (Protected Area)</h3>
-              <p>Karena Anda adalah anggota kelompok, Anda berhak mengubah tema website.</p>
-              {/* Nanti komponen ubah warna dari Role 4 ditaruh di sini */}
-              <button disabled>Simulasi Tombol Ubah Warna</button>
-            </div>
-          ) : (
-            <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#ffebee' }}>
-              <h3>🔒 Akses Terbatas</h3>
-              <p>Anda login sebagai pengunjung luar. Anda hanya dapat melihat biodata kelompok.</p>
+    <div style={styles.appContainer}>
+      {/* Header */}
+      <header style={styles.header}>
+        <div style={styles.headerContent}>
+          <h1 style={styles.title}>🎭 Tugas PKPL - Kelompok</h1>
+          {user && (
+            <div style={styles.userInfo}>
+              <span>👤 {user.name || user.email}</span>
+              <button onClick={logout} style={styles.logoutBtn}>
+                Logout
+              </button>
             </div>
           )}
+        </div>
+      </header>
 
-          <button 
-            onClick={logout} 
-            style={{ marginTop: '20px', padding: '8px 16px', cursor: 'pointer' }}
-          >
-            Logout
-          </button>
-        </div>
-      )}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-          <GoogleLogin 
-          onSuccess={handleSuccess} 
-          onError={handleError} 
-          />
-          
-          <button 
-            onClick={() => {
-              const dummyUser = { 
-                name: "admin", 
-                email: "bypass@gmail.com", 
-                is_member: true
-              };
-              localStorage.setItem('user_data', JSON.stringify(dummyUser));
-              localStorage.setItem('access_token', 'token_palsu_123');
-              window.location.reload();
-            }}
-            style={{ padding: '8px 16px', backgroundColor: '#333', color: 'white', border: '1px dashed #777', cursor: 'pointer' }}
-          >
-            🛠️ Bypass Login (Test UI Anggota)
-          </button>
-        </div>
+      {/* Main Content */}
+      <main style={styles.main}>
+        {/* Jika belum login */}
+        {!user ? (
+          <div style={styles.loginSection}>
+            <div style={styles.loginCard}>
+              <h2>🔒 Silakan Login</h2>
+              <p style={styles.loginDescription}>
+                Login menggunakan akun Google untuk melihat biodata kelompok dan mengakses fitur lainnya.
+              </p>
+              <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
+            </div>
+          </div>
+        ) : (
+          /* Jika sudah login, cek status role-nya */
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
+            {user.is_member ? (
+              <div style={styles.memberStatus}>
+                <h3>✔️ Status: Anggota Kelompok</h3>
+                <p>Anda memiliki akses penuh kepada semua fitur, termasuk editor tema.</p>
+              </div>
+            ) : (
+              <div style={styles.guestStatus}>
+                <h3>👤 Status: Pengunjung</h3>
+                <p>Anda dapat melihat biodata kelompok namun tidak dapat mengubah tema.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Biodata Grid - Ditampilkan untuk semua user */}
+        <BioGrid />
+
+        {/* Theme Editor - HANYA ditampikan jika user adalah member kelompok */}
+        {user?.is_member && <ThemeEditor />}
+      </main>
+
+      {/* Footer */}
+      <footer style={styles.footer}>
+        <p>© 2026 Kelompok PKPL. Semua hak dilindungi.</p>
+      </footer>
     </div>
   );
 }
+
+// ----- Styles -----
+// (Saya buatkan ulang full styling-nya agar tampilan UI dari temanmu tetap rapi 
+// saat kamu copy-paste keseluruhan file ini)
+const styles = {
+  appContainer: {
+    minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    fontFamily: 'var(--font-family, sans-serif)',
+    backgroundColor: 'var(--primary-bg, #121212)',
+    color: 'var(--primary-text, #ffffff)',
+  },
+  loadingContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100vh',
+    backgroundColor: '#121212',
+    color: '#fff',
+  },
+  loadingText: { fontSize: '1.2rem' },
+  header: {
+    backgroundColor: '#1e1e1e',
+    padding: '1rem 2rem',
+    borderBottom: '1px solid #333',
+  },
+  headerContent: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    maxWidth: '1200px',
+    margin: '0 auto',
+  },
+  title: { margin: 0, fontSize: '1.5rem' },
+  userInfo: { display: 'flex', alignItems: 'center', gap: '1rem' },
+  logoutBtn: {
+    padding: '8px 16px',
+    backgroundColor: '#dc3545',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontWeight: 'bold'
+  },
+  main: {
+    flex: 1,
+    padding: '2rem',
+    maxWidth: '1200px',
+    margin: '0 auto',
+    width: '100%',
+    boxSizing: 'border-box',
+  },
+  loginSection: { display: 'flex', justifyContent: 'center', marginTop: '3rem', marginBottom: '3rem' },
+  loginCard: {
+    backgroundColor: '#1e1e1e',
+    padding: '2.5rem',
+    borderRadius: '8px',
+    border: '1px solid #333',
+    textAlign: 'center',
+    maxWidth: '400px',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
+  },
+  loginDescription: { color: '#aaa', marginBottom: '2rem' },
+  memberStatus: {
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+    border: '1px solid #4caf50',
+    padding: '1rem',
+    borderRadius: '8px',
+  },
+  guestStatus: {
+    backgroundColor: 'rgba(255, 152, 0, 0.1)',
+    border: '1px solid #ff9800',
+    padding: '1rem',
+    borderRadius: '8px',
+  },
+  footer: {
+    textAlign: 'center',
+    padding: '1rem',
+    backgroundColor: '#1e1e1e',
+    borderTop: '1px solid #333',
+    fontSize: '0.9rem',
+    color: '#888',
+  },
+};
 
 export default App;
