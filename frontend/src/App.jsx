@@ -1,17 +1,14 @@
 import React, { useContext } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { AuthContext } from './context/AuthContext';
-import './App.css'; // Opsional, hapus jika tidak pakai styling bawaan
+import './App.css';
 
 function App() {
-  // Mengambil state dan fungsi dari AuthContext
   const { user, loginWithGoogle, logout, loading } = useContext(AuthContext);
 
-  // Fungsi yang dipanggil saat Google berhasil memberikan token
   const handleSuccess = async (credentialResponse) => {
     console.log("1. Token dari Google diterima!");
     
-    // Kirim token tersebut ke backend Django via Context
     const success = await loginWithGoogle(credentialResponse.credential);
     
     if (success) {
@@ -25,14 +22,12 @@ function App() {
     console.log('Login Google Gagal');
   };
 
-  // Jangan render apa-apa sampai pengecekan sesi selesai
   if (loading) return <div>Memuat data pengguna...</div>;
 
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
       <h1>Tugas PKPL - Kelompok</h1>
       
-      {/* Jika belum login (user === null) */}
       {!user ? (
         <div style={{ border: '1px solid #ccc', padding: '1rem', borderRadius: '8px' }}>
           <h2>Silakan Login</h2>
@@ -43,13 +38,10 @@ function App() {
           />
         </div>
       ) : (
-        /* Jika SUDAH login */
         <div style={{ border: '1px solid #4CAF50', padding: '1rem', borderRadius: '8px' }}>
           <h2>Selamat datang, {user.name || user.email}!</h2>
           <p>Email: {user.email}</p>
           
-          {/* SIMULASI OTORISASI (AUTHORIZATION) */}
-          {/* Asumsi: Backend mengembalikan atribut 'is_member' bernilai true/false */}
           {user.is_member ? (
             <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#e8f5e9' }}>
               <h3>🎨 Panel Editor Tema (Protected Area)</h3>
@@ -78,18 +70,16 @@ function App() {
           onError={handleError} 
           />
           
-          {/* TAMBAHKAN TOMBOL INI UNTUK TESTING */}
           <button 
             onClick={() => {
-              // Simulasi data yang seolah-olah dikembalikan oleh Django
               const dummyUser = { 
                 name: "admin", 
                 email: "bypass@gmail.com", 
-                is_member: true // Coba ganti jadi false untuk tes UI Guest
+                is_member: true
               };
               localStorage.setItem('user_data', JSON.stringify(dummyUser));
               localStorage.setItem('access_token', 'token_palsu_123');
-              window.location.reload(); // Refresh halaman agar useEffect di Context membaca localStorage
+              window.location.reload();
             }}
             style={{ padding: '8px 16px', backgroundColor: '#333', color: 'white', border: '1px dashed #777', cursor: 'pointer' }}
           >
