@@ -17,10 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from .views import ThemeUpdateView, GoogleLoginView
+from anggota.views import MemberListView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
+
+    path('api/members/', MemberListView.as_view(), name='member-list'),
     
     # Endpoint API untuk fitur ganti tema
     path('api/update-theme/', ThemeUpdateView.as_view(), name='update-theme'),
