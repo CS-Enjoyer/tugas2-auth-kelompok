@@ -6,7 +6,7 @@ import ThemeEditor from './components/ThemeEditor';
 import './styles/GlobalStyles.css';
 
 function App() {
-  const { user, loginWithGoogle, logout, loading } = useContext(AuthContext);
+  const { user, loginWithGoogle, logout, loginDummy, loading } = useContext(AuthContext);
 
   useEffect(() => {
     if (user && user.theme) {
@@ -21,7 +21,7 @@ function App() {
   const handleSuccess = async (credentialResponse) => {
     console.log("1. Token dari Google diterima!");
     const success = await loginWithGoogle(credentialResponse.credential);
-    
+
     if (success) {
       console.log("2. Login backend berhasil!");
     } else {
@@ -70,6 +70,18 @@ function App() {
                 Login menggunakan akun Google untuk melihat biodata kelompok dan mengakses fitur lainnya.
               </p>
               <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
+
+              <div style={styles.dummyLoginSection}>
+                <p style={styles.dummyLoginText}>--- ATAU COBA DUMMY ---</p>
+                <div style={styles.dummyLoginButtons}>
+                  <button onClick={() => loginDummy('admin')} style={styles.adminDummyBtn}>
+                    🔑 Login Admin
+                  </button>
+                  <button onClick={() => loginDummy('guest')} style={styles.guestDummyBtn}>
+                    👤 Login Tamu
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         ) : (
@@ -77,12 +89,12 @@ function App() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
             {user.is_member ? (
               <div style={styles.memberStatus}>
-                <h3>✔️ Status: Anggota Kelompok</h3>
+                <h3>✔️ Status: Admin</h3>
                 <p>Anda memiliki akses penuh kepada semua fitur, termasuk editor tema.</p>
               </div>
             ) : (
               <div style={styles.guestStatus}>
-                <h3>👤 Status: Pengunjung</h3>
+                <h3>👤 Status: Tamu</h3>
                 <p>Anda dapat melihat biodata kelompok namun tidak dapat mengubah tema.</p>
               </div>
             )}
@@ -167,6 +179,29 @@ const styles = {
     boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
   },
   loginDescription: { color: '#aaa', marginBottom: '2rem' },
+  dummyLoginSection: { marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #333' },
+  dummyLoginText: { color: '#666', fontSize: '0.8rem', marginBottom: '1rem', letterSpacing: '1px' },
+  dummyLoginButtons: { display: 'flex', flexDirection: 'column', gap: '0.8rem' },
+  adminDummyBtn: {
+    padding: '10px',
+    backgroundColor: '#198754',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontWeight: 'bold',
+    transition: 'all 0.2s'
+  },
+  guestDummyBtn: {
+    padding: '10px',
+    backgroundColor: '#6c757d',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontWeight: 'bold',
+    transition: 'all 0.2s'
+  },
   memberStatus: {
     backgroundColor: 'rgba(76, 175, 80, 0.1)',
     border: '1px solid #4caf50',

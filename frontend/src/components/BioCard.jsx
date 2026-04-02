@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
 
 function BioCard({ member, isSelected, onSelect }) {
+  const { user } = useContext(AuthContext);
   const [isHovered, setIsHovered] = useState(false);
 
   const {
@@ -29,15 +31,15 @@ function BioCard({ member, isSelected, onSelect }) {
 
   const cardStyle = isSelected
     ? {
-        borderColor: theme_color,
-        borderWidth: '2px',
-        borderStyle: 'solid',
-        backgroundColor: `${theme_color}08`,
-        boxShadow: `0 12px 40px ${theme_color}25`,
-        transform: 'translateY(-6px)',
-      }
+      borderColor: theme_color,
+      borderWidth: '2px',
+      borderStyle: 'solid',
+      backgroundColor: `${theme_color}08`,
+      boxShadow: `0 12px 40px ${theme_color}25`,
+      transform: 'translateY(-6px)',
+    }
     : isHovered
-    ? {
+      ? {
         borderColor: activeColor,
         borderWidth: '2px',
         borderStyle: 'solid',
@@ -45,7 +47,7 @@ function BioCard({ member, isSelected, onSelect }) {
         boxShadow: `0 10px 32px ${activeColor}20`,
         transform: 'translateY(-4px)',
       }
-    : {
+      : {
         border: '1.5px solid #ebebeb',
         backgroundColor: '#fff',
         boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
@@ -61,7 +63,7 @@ function BioCard({ member, isSelected, onSelect }) {
         transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
         borderRadius: '16px',
         padding: '28px 24px 24px',
-        cursor: 'pointer',
+        cursor: user?.is_member ? 'pointer' : 'default',
         position: 'relative',
         overflow: 'hidden',
         display: 'flex',
@@ -259,7 +261,7 @@ function BioCard({ member, isSelected, onSelect }) {
               color: 'white', fontSize: '9px',
               transition: 'background-color 0.3s ease',
             }}>✓</span>
-            Anggota Kelompok
+            Admin
           </div>
         ) : (
           <div style={{
