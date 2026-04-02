@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axiosInstance from '../api/axios';
+import { AuthContext } from '../context/AuthContext';
 import BioCard from './BioCard';
 
 const MEMBER_COLORS = [
@@ -12,6 +13,7 @@ const MEMBER_COLORS = [
 ];
 
 function BioGrid() {
+  const { user } = useContext(AuthContext);
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -42,6 +44,9 @@ function BioGrid() {
   };
 
   const handleSelectMember = (member) => {
+    // Hanya Admin yang bisa mengubah tema warna
+    if (!user?.is_member) return;
+
     if (selectedMember?.id === member.id) {
       setSelectedMember(null);
       applyThemeColor(null);
@@ -74,12 +79,12 @@ function BioGrid() {
   };
 
   const getDummyMembers = () => [
-    { id: 1, name: 'Anita Wijaya',    email: 'anita@example.com',  role: 'UI/UX Developer',    avatar_url: 'https://via.placeholder.com/150?text=AW', phone: '+62812345678', is_member: true,  theme_color: '#4CAF50' },
-    { id: 2, name: 'Budi Santoso',    email: 'budi@example.com',   role: 'Backend Developer',  avatar_url: 'https://via.placeholder.com/150?text=BS', phone: '+62812345679', is_member: true,  theme_color: '#2196F3' },
-    { id: 3, name: 'Citra Dewi',      email: 'citra@example.com',  role: 'Frontend Developer', avatar_url: 'https://via.placeholder.com/150?text=CD', phone: '+62812345680', is_member: true,  theme_color: '#E91E63' },
-    { id: 4, name: 'Doni Prasetyo',   email: 'doni@example.com',   role: 'Database Admin',     avatar_url: 'https://via.placeholder.com/150?text=DP', phone: '+62812345681', is_member: true,  theme_color: '#FF9800' },
-    { id: 5, name: 'Eka Susanto',     email: 'eka@example.com',    role: 'QA Tester',          avatar_url: 'https://via.placeholder.com/150?text=ES', phone: '+62812345682', is_member: false, theme_color: '#9C27B0' },
-    { id: 6, name: 'Fitri Handayani', email: 'fitri@example.com',  role: 'Project Manager',    avatar_url: 'https://via.placeholder.com/150?text=FH', phone: '+62812345683', is_member: true,  theme_color: '#00BCD4' },
+    { id: 1, name: 'Anita Wijaya', email: 'anita@example.com', role: 'UI/UX Developer', avatar_url: 'https://via.placeholder.com/150?text=AW', phone: '+62812345678', is_member: true, theme_color: '#4CAF50' },
+    { id: 2, name: 'Budi Santoso', email: 'budi@example.com', role: 'Backend Developer', avatar_url: 'https://via.placeholder.com/150?text=BS', phone: '+62812345679', is_member: true, theme_color: '#2196F3' },
+    { id: 3, name: 'Citra Dewi', email: 'citra@example.com', role: 'Frontend Developer', avatar_url: 'https://via.placeholder.com/150?text=CD', phone: '+62812345680', is_member: true, theme_color: '#E91E63' },
+    { id: 4, name: 'Doni Prasetyo', email: 'doni@example.com', role: 'Database Admin', avatar_url: 'https://via.placeholder.com/150?text=DP', phone: '+62812345681', is_member: true, theme_color: '#FF9800' },
+    { id: 5, name: 'Eka Susanto', email: 'eka@example.com', role: 'QA Tester', avatar_url: 'https://via.placeholder.com/150?text=ES', phone: '+62812345682', is_member: false, theme_color: '#9C27B0' },
+    { id: 6, name: 'Fitri Handayani', email: 'fitri@example.com', role: 'Project Manager', avatar_url: 'https://via.placeholder.com/150?text=FH', phone: '+62812345683', is_member: true, theme_color: '#00BCD4' },
   ];
 
   const activeColor = getComputedStyle(document.documentElement)
@@ -109,7 +114,7 @@ function BioGrid() {
               style={{ backgroundColor: activeColor }}
             />
             <h2 className="text-lg font-bold tracking-tight text-gray-800">
-              Anggota Kelompok
+              Daftar Admin & Tamu
             </h2>
           </div>
         </div>
@@ -121,14 +126,14 @@ function BioGrid() {
               <div
                 key={m.id}
                 onClick={() => handleSelectMember(m)}
-                className="w-3 h-3 rounded-full cursor-pointer transition-all duration-200 hover:scale-125"
+                className={`w-3 h-3 rounded-full transition-all duration-200 ${user?.is_member ? 'cursor-pointer hover:scale-125' : 'cursor-default opacity-50'}`}
                 style={{
                   backgroundColor: m.theme_color,
                   boxShadow: selectedMember?.id === m.id
                     ? `0 0 0 2px white, 0 0 0 3px ${m.theme_color}`
                     : 'none',
                 }}
-                title={m.name}
+                title={user?.is_member ? `Ganti ke tema ${m.name}` : m.name}
               />
             ))}
           </div>
@@ -147,7 +152,9 @@ function BioGrid() {
 
       {/* Hint */}
       <p className="text-xs text-gray-300 mb-5 ml-3 italic">
-        Klik kartu untuk mengubah tema warna halaman
+        {user?.is_member
+          ? "Klik kartu untuk mengubah tema warna halaman"
+          : "Hanya Admin yang dapat mengubah tema warna halaman"}
       </p>
 
       {/* Error banner */}

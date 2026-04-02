@@ -22,15 +22,15 @@ export const AuthProvider = ({ children }) => {
                 id_token: googleCredential,
                 access_token: googleCredential
             });
-            
+
             console.log("Respon dari Django:", response.data);
-            
+
             const token = response.data.access || response.data.key || response.data.access_token;
             const userInfo = response.data.user || response.data.user_info || {};
 
             localStorage.setItem('access_token', token);
             localStorage.setItem('user_data', JSON.stringify(userInfo));
-            
+
             setUser(userInfo);
             return true;
         } catch (error) {
@@ -45,8 +45,18 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     };
 
+    const loginDummy = (role) => {
+        const dummyUser = role === 'admin'
+            ? { name: 'Admin Dummy', email: 'admin@example.com', is_member: true }
+            : { name: 'Guest Dummy', email: 'guest@example.com', is_member: false };
+
+        localStorage.setItem('access_token', 'dummy-token');
+        localStorage.setItem('user_data', JSON.stringify(dummyUser));
+        setUser(dummyUser);
+    };
+
     return (
-        <AuthContext.Provider value={{ user, loginWithGoogle, logout, loading }}>
+        <AuthContext.Provider value={{ user, loginWithGoogle, logout, loginDummy, loading }}>
             {children}
         </AuthContext.Provider>
     );
