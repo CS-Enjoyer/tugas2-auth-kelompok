@@ -49,6 +49,7 @@
 
 
 
+import os
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
@@ -101,20 +102,37 @@ class GoogleLoginView(SocialLoginView):
     authentication_classes = []
 
     def get_response(self):
-        """
-        Menambahkan flag is_member ke dalam data user yang dikembalikan ke frontend.
-        is_member = true jika email user terdaftar di tabel Member.
-        """
         from anggota.models import Member
         response = super().get_response()
         
-        # User details serializer biasanya mengembalikan data user di field 'user'
-        if response.status_code == 200 and 'user' in response.data:
-            user_data = response.data['user']
-            email = user_data.get('email')
+        user = getattr(self, 'user', None)
+        
+        if response.status_code == 200:
+            # Detect where user data is located
+            user_data = response.data.get('user') or response.data
+            
+            # Find email from multiple possible sources
+            email = getattr(user, 'email', None)
+            if not email and isinstance(user_data, dict):
+                email = user_data.get('email')
+            
+            print(f"DEBUG: Login Attempt for email: '{email}'")
+
             if email:
-                user_data['is_member'] = Member.objects.filter(email=email).exists()
-            else:
-                user_data['is_member'] = False
+                email = email.lower().strip()
+                # Get whitelist from .env
+                allowed_emails_str = os.getenv("ALLOWED_MEMBER_EMAILS", "")
+                allowed_emails = [e.strip().lower() for e in allowed_emails_str.split(",") if e.strip()]
+                
+                is_member = (email in allowed_emails) or Member.objects.filter(email=email).exists()
+                print(f"DEBUG: is_member={is_member} (Whitelist: {email in allowed_emails})")
+                
+                # Masukkan flag is_member ke semua lokasi yang mungkin dibaca frontend
+                if isinstance(response.data, dict):
+                    response.data['is_member'] = is_member
+                    if 'user' in response.data and isinstance(response.data['user'], dict):
+                        response.data['user']['is_member'] = is_member
+                    if 'user_info' in response.data and isinstance(response.data['user_info'], dict):
+                        response.data['user_info']['is_member'] = is_member
         
         return response

@@ -31,4 +31,13 @@ class IsGroupMember(permissions.BasePermission):
         if not request.user or not request.user.is_authenticated:
             return False
         
-        return Member.objects.filter(email=request.user.email).exists()
+        # Cek di database DAN di whitelist .env
+        allowed_emails_str = os.getenv('ALLOWED_MEMBER_EMAILS', '')
+        allowed_emails = [e.strip().lower() for e in allowed_emails_str.split(',') if e.strip()]
+        
+        user_email = request.user.email.lower().strip()
+        
+        is_in_whitelist = user_email in allowed_emails
+        is_in_db = Member.objects.filter(email=user_email).exists()
+        
+        return is_in_whitelist or is_in_db
