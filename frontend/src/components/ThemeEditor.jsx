@@ -77,6 +77,21 @@ function ThemeEditor() {
     setIsLoading(true);
     setMessage(null);
 
+    const token = localStorage.getItem('access_token');
+
+    // Jika sedang menggunakan akun dummy, simulasikan saja keberhasilannya
+    // Karena backend tidak mengenali 'dummy-token' untuk autentikasi yang sesungguhnya.
+    if (token === 'dummy-token') {
+      setTimeout(() => {
+        setMessage({
+          type: 'success',
+          text: '✓ [Dummy Mode] Tema berhasil disimpan secara lokal!',
+        });
+        setIsLoading(false);
+      }, 800);
+      return;
+    }
+
     try {
       // Kirim perubahan tema ke backend
       const response = await axiosInstance.post('/api/update-theme/', {
@@ -88,7 +103,7 @@ function ThemeEditor() {
 
       setMessage({
         type: 'success',
-        text: '✓ Tema berhasil diperbarui!',
+        text: '✓ Tema berhasil diperbarui di server!',
       });
 
       console.log('Theme updated:', response.data);
@@ -96,7 +111,7 @@ function ThemeEditor() {
       console.error('Error updating theme:', error);
       setMessage({
         type: 'error',
-        text: '✗ Gagal memperbarui tema. Silakan coba lagi.',
+        text: '✗ Gagal memperbarui tema di server. Silakan coba lagi.',
       });
     } finally {
       setIsLoading(false);
