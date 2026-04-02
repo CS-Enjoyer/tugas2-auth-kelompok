@@ -93,3 +93,22 @@ class GoogleLoginView(SocialLoginView):
 
     permission_classes = [AllowAny]
     authentication_classes = []
+
+    def get_response(self):
+        """
+        Menambahkan flag is_member ke dalam data user yang dikembalikan ke frontend.
+        is_member = true jika email user terdaftar di tabel Member.
+        """
+        from anggota.models import Member
+        response = super().get_response()
+        
+        # User details serializer biasanya mengembalikan data user di field 'user'
+        if response.status_code == 200 and 'user' in response.data:
+            user_data = response.data['user']
+            email = user_data.get('email')
+            if email:
+                user_data['is_member'] = Member.objects.filter(email=email).exists()
+            else:
+                user_data['is_member'] = False
+        
+        return response

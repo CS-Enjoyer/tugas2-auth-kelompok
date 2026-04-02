@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axiosInstance from '../api/axios';
+import { AuthContext } from '../context/AuthContext';
 
 function ThemeEditor() {
   /**
    * Component untuk mengubah tema website (warna dan font)
-   * Hanya ditampilkan untuk users yang is_member = true
+   * Hanya ditampilkan untuk users yang is_member = true (Admin)
    * Mengirim perubahan ke backend: POST /api/update-theme/
    */
+  const { user } = useContext(AuthContext);
 
   const [theme, setTheme] = useState({
     primaryColor: getCSSSVariable('--primary-color') || '#4CAF50',
@@ -17,6 +19,11 @@ function ThemeEditor() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState(null);
+
+  // Jika bukan admin, jangan tampilkan apa-apa (safety check)
+  if (!user?.is_member) {
+    return null;
+  }
 
   function getCSSSVariable(varName) {
     /**
@@ -121,9 +128,9 @@ function ThemeEditor() {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h3 style={styles.title}>🎨 Editor Tema Website</h3>
+        <h3 style={styles.title}>🎨 Editor Tema Website (Admin)</h3>
         <p style={styles.subtitle}>
-          Ubah warna dan font website untuk semua pengguna
+          Ubah warna dan font website untuk semua pengguna. Fitur ini hanya untuk Admin.
         </p>
       </div>
 
