@@ -189,4 +189,33 @@ CORS_ALLOWED_ORIGINS = [
 
 # Mengizinkan pengiriman kredensial (seperti cookies/token)
 CORS_ALLOW_CREDENTIALS = True
+
+# Allauth / SocialAccount Configuration
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': env('GOOGLE_CLIENT_ID'),
+            'secret': env('GOOGLE_CLIENT_SECRET'),
+            'key': ''
+        },
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    }
+}
+
+# Provider-specific settings
+# Ganti ke False agar tidak mencoba menyimpan token ke database (menghindari ValueError)
+SOCIALACCOUNT_STORE_TOKENS = False
+SOCIALACCOUNT_ADAPTER = 'allauth.socialaccount.adapter.DefaultSocialAccountAdapter'
+
+# Account settings (Modern Syntax for allauth >= 0.60.0)
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+ACCOUNT_EMAIL_VERIFICATION = 'none' # Sesuaikan kebutuhan
+
 load_dotenv()

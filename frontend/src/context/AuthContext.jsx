@@ -26,7 +26,17 @@ export const AuthProvider = ({ children }) => {
             console.log("Respon dari Django:", response.data);
 
             const token = response.data.access || response.data.key || response.data.access_token;
-            const userInfo = response.data.user || response.data.user_info || {};
+            let userInfo = response.data.user || response.data.user_info || {};
+
+            // Ambil flag is_member dari root atau dari dalam objek user
+            const isMemberFlag =
+                response.data.is_member === true ||
+                userInfo.is_member === true;
+
+            // Gabungkan flag ke dalam userInfo agar seragam
+            userInfo = { ...userInfo, is_member: isMemberFlag };
+
+            console.log("User Info Terpilih:", userInfo);
 
             localStorage.setItem('access_token', token);
             localStorage.setItem('user_data', JSON.stringify(userInfo));
