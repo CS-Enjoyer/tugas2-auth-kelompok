@@ -55,18 +55,8 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     };
 
-    const loginDummy = (role) => {
-        const dummyUser = role === 'admin'
-            ? { name: 'Admin Dummy', email: 'admin@example.com', is_member: true }
-            : { name: 'Guest Dummy', email: 'guest@example.com', is_member: false };
-
-        localStorage.setItem('access_token', 'dummy-token');
-        localStorage.setItem('user_data', JSON.stringify(dummyUser));
-        setUser(dummyUser);
-    };
-
     return (
-        <AuthContext.Provider value={{ user, loginWithGoogle, logout, loginDummy, loading }}>
+        <AuthContext.Provider value={{ user, loginWithGoogle, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );

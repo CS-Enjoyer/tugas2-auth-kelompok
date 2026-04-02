@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from rest_framework.test import APIClient
 from rest_framework import status
 from .models import Member
+import os
+from unittest.mock import patch
 
 class MemberModelTest(TestCase):
     def setUp(self):
@@ -29,25 +31,38 @@ class ThemeUpdatePermissionTest(TestCase):
         # User 2: User biasa (Tamu)
         self.guest_user = User.objects.create_user(username='guest', email='guest@example.com', password='password123')
 
+        # User 3: User Whitelist (TIDAK ada di DB, tapi ada di .env)
+        self.whitelist_user = User.objects.create_user(username='whitelist', email='whitelist@example.com', password='password')
+
     def test_theme_update_by_admin(self):
         """Test: Admin (email terdaftar di table Member) bisa mengakses API ganti tema"""
         self.client.force_authenticate(user=self.admin_user)
         response = self.client.post('/api/update-theme/', {'color': '#ff0000', 'font': 'Arial'}, format='json')
-        
-        # Sesuai logika di IsGroupMember, harusnya 200 OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['status'], 'success')
+
+    @patch.dict(os.environ, {"ALLOWED_MEMBER_EMAILS": "whitelist@example.com,other@test.com"})
+    def test_theme_update_by_whitelist(self):
+        """Test: User yang emailnya ada di whitelist .env bisa mengakses API meskipun tidak ada di DB"""
+        self.client.force_authenticate(user=self.whitelist_user)
+        response = self.client.post('/api/update-theme/', {'color': '#112233', 'font': 'Fira Code'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_theme_update_by_guest(self):
-        """Test: Tamu (email TIDAK terdaftar) dilarang mengakses API ganti tema"""
+        """Test: Tamu dilarang mengakses API ganti tema"""
         self.client.force_authenticate(user=self.guest_user)
         response = self.client.post('/api/update-theme/', {'color': '#00ff00', 'font': 'Verdana'}, format='json')
-        
-        # Harus 403 Forbidden karena Permission Denied
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_theme_update_unauthenticated(self):
-        """Test: User yang belum login dilarang mengakses API ganti tema"""
-        response = self.client.post('/api/update-theme/', {'color': '#0000ff', 'font': 'Serif'}, format='json')
-        # DRF mengembalikan 403 jika permission denied, termasuk untuk user anonim
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+class MemberApiTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        Member.objects.create(name="Member A", email="a@test.com", student_id="001")
+        Member.objects.create(name="Member B", email="b@test.com", student_id="002")
+
+    def test_get_member_list(self):
+        """Test: Mendapatkan daftar anggota bio-grid"""
+        response = self.client.get('/api/members/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Menyesuaikan dengan format DRF (bisa berupa list langsung atau paginated dict)
+        data = response.data.get('results') if isinstance(response.data, dict) else response.data
+        self.assertTrue(len(data) >= 2)

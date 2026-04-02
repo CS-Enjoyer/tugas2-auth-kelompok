@@ -70,18 +70,6 @@ function App() {
                 Login menggunakan akun Google untuk melihat biodata kelompok dan mengakses fitur lainnya.
               </p>
               <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
-
-              <div style={styles.dummyLoginSection}>
-                <p style={styles.dummyLoginText}>--- ATAU COBA DUMMY ---</p>
-                <div style={styles.dummyLoginButtons}>
-                  <button onClick={() => loginDummy('admin')} style={styles.adminDummyBtn}>
-                    🔑 Login Admin
-                  </button>
-                  <button onClick={() => loginDummy('guest')} style={styles.guestDummyBtn}>
-                    👤 Login Tamu
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
         ) : (
@@ -176,31 +164,13 @@ const styles = {
     border: '1px solid #333',
     textAlign: 'center',
     maxWidth: '400px',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
+    boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
   },
-  loginDescription: { color: '#aaa', marginBottom: '2rem' },
-  dummyLoginSection: { marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #333' },
-  dummyLoginText: { color: '#666', fontSize: '0.8rem', marginBottom: '1rem', letterSpacing: '1px' },
-  dummyLoginButtons: { display: 'flex', flexDirection: 'column', gap: '0.8rem' },
-  adminDummyBtn: {
-    padding: '10px',
-    backgroundColor: '#198754',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontWeight: 'bold',
-    transition: 'all 0.2s'
-  },
-  guestDummyBtn: {
-    padding: '10px',
-    backgroundColor: '#6c757d',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontWeight: 'bold',
-    transition: 'all 0.2s'
+  loginDescription: {
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+    border: '1px solid #4caf50',
+    padding: '1rem',
+    borderRadius: '8px',
   },
   memberStatus: {
     backgroundColor: 'rgba(76, 175, 80, 0.1)',

@@ -36,8 +36,8 @@ function BioGrid() {
       setError(null);
     } catch (err) {
       console.error('Error fetching members:', err);
-      setError('Gagal mengambil data anggota. Menggunakan data lokal.');
-      setMembers(getDummyMembers());
+      setError('Gagal mengambil data anggota. Menggunakan data cadangan.');
+      setMembers(getFallbackMembers());
     } finally {
       setLoading(false);
     }
@@ -78,7 +78,7 @@ function BioGrid() {
     return `rgb(${r},${g},${b})`;
   };
 
-  const getDummyMembers = () => [
+  const getFallbackMembers = () => [
     { id: 1, name: 'Anita Wijaya', email: 'anita@example.com', role: 'UI/UX Developer', avatar_url: 'https://via.placeholder.com/150?text=AW', phone: '+62812345678', is_member: true, theme_color: '#4CAF50' },
     { id: 2, name: 'Budi Santoso', email: 'budi@example.com', role: 'Backend Developer', avatar_url: 'https://via.placeholder.com/150?text=BS', phone: '+62812345679', is_member: true, theme_color: '#2196F3' },
     { id: 3, name: 'Citra Dewi', email: 'citra@example.com', role: 'Frontend Developer', avatar_url: 'https://via.placeholder.com/150?text=CD', phone: '+62812345680', is_member: true, theme_color: '#E91E63' },
