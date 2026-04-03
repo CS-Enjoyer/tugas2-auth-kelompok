@@ -93,7 +93,7 @@ function BioGrid() {
     {
       id: 2,
       name: 'Ahmad Nizar Sauki',
-      email: 'anizarsauki@gmail.com',
+      email: 'mrnoon26@gmail.com',
       role: 'Backend Developer',
       npm: '2306152046',
       prodi: 'Ilmu Komputer',
@@ -125,17 +125,6 @@ function BioGrid() {
     },
     {
       id: 5,
-      name: 'Eka Susanto',
-      email: 'eka@example.com',
-      role: 'QA Tester',
-      npm: '2306152277',
-      prodi: 'Sistem Informasi',
-      avatar_url: '',
-      is_member: false,
-      theme_color: '#9C27B0',
-    },
-    {
-      id: 6,
       name: 'Ismail Yanuar Anwas',
       email: 'ismailyanuar1960@gmail.com',
       role: 'Project Manager',
