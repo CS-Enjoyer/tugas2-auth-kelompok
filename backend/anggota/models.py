@@ -4,6 +4,7 @@ class Member(models.Model):
     name = models.CharField(max_length=150)
     email = models.EmailField(unique=True)  
     student_id = models.CharField(max_length=20)
+    avatar_url = models.URLField(max_length=500, blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
     
     def __str__(self):

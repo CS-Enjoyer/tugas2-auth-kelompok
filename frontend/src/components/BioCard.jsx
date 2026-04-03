@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react'; 
+import { AuthContext } from '../context/AuthContext';
 
 function getInitials(name = '') {
   return name
@@ -30,6 +31,7 @@ function getActiveColor() {
 }
 
 function BioCard({ member, isSelected, onSelect }) {
+  const { user } = useContext(AuthContext);
   const [imgError, setImgError] = useState(false);
   const [hovered, setHovered] = useState(false);
 
@@ -43,6 +45,8 @@ function BioCard({ member, isSelected, onSelect }) {
     is_member,
   } = member;
 
+  const isViewerAdmin = user?.is_member;
+
   // Selalu pakai warna global dari CSS variable
   const color = getActiveColor();
   const isHex = color.startsWith('#');
@@ -55,7 +59,7 @@ function BioCard({ member, isSelected, onSelect }) {
 
   return (
     <div
-      onClick={() => onSelect(member)}
+      onClick={() => isViewerAdmin && onSelect(member)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -67,7 +71,7 @@ function BioCard({ member, isSelected, onSelect }) {
           : '0 1px 6px 0 rgba(0,0,0,0.06)',
         transform: isElevated ? 'translateY(-4px)' : 'none',
         transition: 'all 0.22s ease',
-        cursor: 'pointer',
+        cursor: isViewerAdmin ? 'pointer' : 'default',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
