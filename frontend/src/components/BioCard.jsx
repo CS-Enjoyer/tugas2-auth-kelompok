@@ -1,286 +1,280 @@
-import React, { useState, useContext } from 'react';
-import { AuthContext } from '../context/AuthContext';
+import React, { useState } from 'react';
+
+function getInitials(name = '') {
+  return name
+    .split(' ')
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? '')
+    .join('');
+}
+
+function hexToRgba(hex, alpha) {
+  const clean = hex.replace('#', '');
+  const num = parseInt(clean, 16);
+  const r = (num >> 16) & 255;
+  const g = (num >> 8) & 255;
+  const b = num & 255;
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function getActiveColor() {
+  try {
+    return (
+      getComputedStyle(document.documentElement)
+        .getPropertyValue('--primary-color')
+        .trim() || '#4CAF50'
+    );
+  } catch {
+    return '#4CAF50';
+  }
+}
 
 function BioCard({ member, isSelected, onSelect }) {
-  const { user } = useContext(AuthContext);
-  const [isHovered, setIsHovered] = useState(false);
+  const [imgError, setImgError] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   const {
-    name = 'Unknown',
-    email = '',
-    role = 'Member',
-    avatar_url = '',
-    phone = '-',
-    is_member = false,
-    theme_color = '#4CAF50',
-  } = member || {};
+    name = '',
+    npm = '-',
+    prodi = '-',
+    email = '-',
+    role = '',
+    avatar_url,
+    is_member,
+  } = member;
 
-  const activeColor = getComputedStyle(document.documentElement)
-    .getPropertyValue('--primary-color')
-    .trim() || '#4CAF50';
+  // Selalu pakai warna global dari CSS variable
+  const color = getActiveColor();
+  const isHex = color.startsWith('#');
+  const bgLight = isHex ? hexToRgba(color, 0.07) : '#f9fffe';
+  const borderActive = isHex ? hexToRgba(color, 0.35) : '#e5e7eb';
 
-  const displayColor = isSelected ? theme_color : activeColor;
-  const isActive = isSelected || isHovered;
+  const initials = getInitials(name);
 
-  const initials = name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .substring(0, 2)
-    .toUpperCase();
-
-  const cardStyle = isSelected
-    ? {
-      borderColor: theme_color,
-      borderWidth: '2px',
-      borderStyle: 'solid',
-      backgroundColor: `${theme_color}08`,
-      boxShadow: `0 12px 40px ${theme_color}25`,
-      transform: 'translateY(-6px)',
-    }
-    : isHovered
-      ? {
-        borderColor: activeColor,
-        borderWidth: '2px',
-        borderStyle: 'solid',
-        backgroundColor: '#fff',
-        boxShadow: `0 10px 32px ${activeColor}20`,
-        transform: 'translateY(-4px)',
-      }
-      : {
-        border: '1.5px solid #ebebeb',
-        backgroundColor: '#fff',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-        transform: 'translateY(0)',
-      };
+  const isElevated = isSelected || hovered;
 
   return (
     <div
-      onClick={() => onSelect && onSelect(member)}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onClick={() => onSelect(member)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
-        transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        background: '#ffffff',
+        border: `1.5px solid ${isElevated ? color : borderActive}`,
         borderRadius: '16px',
-        padding: '28px 24px 24px',
-        cursor: user?.is_member ? 'pointer' : 'default',
-        position: 'relative',
+        boxShadow: isElevated
+          ? `0 8px 28px 0 ${isHex ? hexToRgba(color, 0.18) : 'rgba(0,0,0,0.1)'}`
+          : '0 1px 6px 0 rgba(0,0,0,0.06)',
+        transform: isElevated ? 'translateY(-4px)' : 'none',
+        transition: 'all 0.22s ease',
+        cursor: 'pointer',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
-        /* Kunci: semua kartu tinggi sama */
-        height: '360px',
-        ...cardStyle,
       }}
     >
-      {/* Top accent bar */}
-      <div style={{
-        position: 'absolute',
-        top: 0, left: 0, right: 0,
-        height: '3px',
-        borderRadius: '16px 16px 0 0',
-        background: isActive
-          ? `linear-gradient(90deg, ${displayColor}, ${displayColor}70)`
-          : 'transparent',
-        transition: 'all 0.3s ease',
-      }} />
-
-      {/* Selected checkmark */}
-      {isSelected && (
-        <div style={{
-          position: 'absolute',
-          top: '12px', right: '12px',
-          width: '22px', height: '22px',
-          borderRadius: '50%',
-          backgroundColor: theme_color,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: 'white', fontSize: '11px', fontWeight: 'bold',
-          boxShadow: `0 2px 8px ${theme_color}50`,
-        }}>✓</div>
-      )}
-
-      {/* ── Avatar ── fixed size, always centered */}
-      <div style={{ position: 'relative', marginBottom: '16px', flexShrink: 0 }}>
-        {/* Glow */}
-        {isActive && (
-          <div style={{
-            position: 'absolute', inset: '-6px',
+      {/* ── Avatar + Name + Role ── */}
+      <div
+        style={{
+          background: bgLight,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          padding: '28px 20px 20px',
+          gap: '10px',
+        }}
+      >
+        {/* Avatar */}
+        <div
+          style={{
+            width: '96px',
+            height: '96px',
             borderRadius: '50%',
-            background: `radial-gradient(circle, ${displayColor}25 0%, transparent 70%)`,
-          }} />
-        )}
-        <div style={{
-          width: '88px', height: '88px',
-          borderRadius: '50%',
-          overflow: 'hidden',
-          border: `3px solid ${isActive ? displayColor : '#e5e7eb'}`,
-          boxShadow: isActive ? `0 0 0 3px ${displayColor}20` : 'none',
-          transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
-          backgroundColor: displayColor,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          position: 'relative',
-          flexShrink: 0,
-        }}>
-          {avatar_url ? (
+            background: color,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden',
+            flexShrink: 0,
+            transition: 'background 0.3s ease',
+          }}
+        >
+          {avatar_url && !imgError ? (
             <img
               src={avatar_url}
               alt={name}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              onError={(e) => { e.target.style.display = 'none'; }}
+              onError={() => setImgError(true)}
             />
-          ) : null}
-          {/* Initials fallback (selalu ada di belakang img) */}
-          <span style={{
-            position: 'absolute',
-            color: 'white',
-            fontWeight: '700',
-            fontSize: '26px',
-            letterSpacing: '0.5px',
-            userSelect: 'none',
-          }}>{initials}</span>
+          ) : (
+            <span
+              style={{
+                color: '#ffffff',
+                fontWeight: '700',
+                fontSize: '28px',
+                letterSpacing: '1px',
+                userSelect: 'none',
+              }}
+            >
+              {initials}
+            </span>
+          )}
         </div>
-      </div>
 
-      {/* ── Name ── fixed line-height, no wrap */}
-      <h3 style={{
-        fontSize: '15px',
-        fontWeight: '700',
-        color: isActive ? displayColor : '#1a1a2e',
-        margin: '0 0 6px',
-        transition: 'color 0.3s ease',
-        textAlign: 'center',
-        lineHeight: '1.3',
-        width: '100%',
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-      }}>{name}</h3>
+        {/* Name */}
+        <p
+          style={{
+            margin: 0,
+            fontWeight: '700',
+            fontSize: '16px',
+            color: isElevated ? color : '#1a1a1a',
+            textAlign: 'center',
+            lineHeight: 1.3,
+            transition: 'color 0.2s',
+          }}
+        >
+          {name}
+        </p>
 
-      {/* ── Role pill ── fixed height */}
-      <span style={{
-        display: 'inline-block',
-        fontSize: '11px',
-        fontWeight: '600',
-        padding: '3px 12px',
-        borderRadius: '20px',
-        marginBottom: '16px',
-        height: '22px',
-        lineHeight: '16px',
-        backgroundColor: isActive ? `${displayColor}15` : '#f4f4f5',
-        color: isActive ? displayColor : '#71717a',
-        transition: 'all 0.3s ease',
-        whiteSpace: 'nowrap',
-      }}>{role}</span>
-
-      {/* ── Divider ── */}
-      <div style={{
-        width: '100%',
-        height: '1px',
-        background: isActive
-          ? `linear-gradient(90deg, transparent, ${displayColor}40, transparent)`
-          : 'linear-gradient(90deg, transparent, #e5e7eb, transparent)',
-        marginBottom: '14px',
-        transition: 'all 0.3s ease',
-        flexShrink: 0,
-      }} />
-
-      {/* ── Info rows ── flex-grow mengisi sisa ruang */}
-      <div style={{
-        width: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px',
-        flex: 1,
-      }}>
-        {/* Email */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{
-            width: '24px', height: '24px', borderRadius: '6px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '12px', flexShrink: 0,
-            backgroundColor: isActive ? `${displayColor}15` : '#f4f4f5',
-            color: isActive ? displayColor : '#9ca3af',
-            transition: 'all 0.3s ease',
-          }}>✉</span>
-          <a
-            href={`mailto:${email}`}
-            onClick={(e) => e.stopPropagation()}
-            title={email}
+        {/* Role badge */}
+        {role && (
+          <span
             style={{
+              padding: '3px 14px',
+              borderRadius: '20px',
+              border: `1px solid ${isHex ? hexToRgba(color, 0.3) : '#e5e7eb'}`,
+              background: '#ffffff',
+              color: '#666',
               fontSize: '12px',
-              color: isActive ? displayColor : '#52525b',
-              textDecoration: 'none',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              transition: 'color 0.3s ease',
+              fontWeight: '500',
             }}
           >
-            {email.length > 24 ? email.substring(0, 24) + '…' : email}
-          </a>
-        </div>
-
-        {/* Phone */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{
-            width: '24px', height: '24px', borderRadius: '6px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '12px', flexShrink: 0,
-            backgroundColor: isActive ? `${displayColor}15` : '#f4f4f5',
-            color: isActive ? displayColor : '#9ca3af',
-            transition: 'all 0.3s ease',
-          }}>☏</span>
-          <span style={{ fontSize: '12px', color: '#52525b' }}>{phone}</span>
-        </div>
+            {role}
+          </span>
+        )}
       </div>
 
-      {/* ── Member badge ── selalu di bawah, fixed */}
-      <div style={{
-        width: '100%',
-        paddingTop: '12px',
-        borderTop: '1px solid #f0f0f0',
-        marginTop: '12px',
-        flexShrink: 0,
-      }}>
+      {/* Divider */}
+      <div style={{ height: '1px', background: '#f0f0f0' }} />
+
+      {/* Info rows */}
+      <div
+        style={{
+          padding: '16px 20px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px',
+          flex: 1,
+        }}
+      >
+        <InfoRow icon={<EmailIcon />} value={email} isEmail color={color} />
+        <InfoRow icon={<NpmIcon />}   value={npm}   color={color} />
+        <InfoRow icon={<ProdiIcon />} value={prodi} color={color} />
+      </div>
+
+      {/* Divider */}
+      <div style={{ height: '1px', background: '#f0f0f0' }} />
+
+      {/* Admin / Tamu footer */}
+      <div
+        style={{
+          padding: '10px 20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '6px',
+          background: is_member ? bgLight : '#fafafa',
+          transition: 'background 0.3s ease',
+        }}
+      >
         {is_member ? (
-          <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            gap: '6px',
-            padding: '6px 0',
-            borderRadius: '8px',
-            fontSize: '12px', fontWeight: '600',
-            backgroundColor: isActive ? `${displayColor}12` : '#f0fdf4',
-            color: isActive ? displayColor : '#16a34a',
-            transition: 'all 0.3s ease',
-          }}>
-            <span style={{
-              width: '16px', height: '16px', borderRadius: '50%',
-              backgroundColor: isActive ? displayColor : '#22c55e',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: 'white', fontSize: '9px',
-              transition: 'background-color 0.3s ease',
-            }}>✓</span>
-            Admin
-          </div>
+          <>
+            <CheckIcon color={color} />
+            <span style={{ color: color, fontWeight: '600', fontSize: '13px', transition: 'color 0.3s' }}>
+              Admin
+            </span>
+          </>
         ) : (
-          <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            gap: '6px', padding: '6px 0', borderRadius: '8px',
-            fontSize: '12px', fontWeight: '600',
-            backgroundColor: '#f8f8f8', color: '#9ca3af',
-          }}>
-            <span style={{
-              width: '16px', height: '16px', borderRadius: '50%',
-              backgroundColor: '#d1d5db',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: 'white', fontSize: '9px',
-            }}>?</span>
-            Tamu
-          </div>
+          <span style={{ color: '#aaa', fontSize: '13px' }}>Tamu</span>
         )}
       </div>
     </div>
+  );
+}
+
+// ── Sub-components
+
+function InfoRow({ icon, value, isEmail, color }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+      <span style={{ color: '#bbb', flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+        {icon}
+      </span>
+      {isEmail ? (
+        <a
+          href={`mailto:${value}`}
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            fontSize: '13px',
+            color: color,
+            textDecoration: 'none',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            transition: 'color 0.3s',
+          }}
+        >
+          {value}
+        </a>
+      ) : (
+        <span
+          style={{
+            fontSize: '13px',
+            color: '#444',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {value}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function EmailIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+      <polyline points="22,6 12,13 2,6"/>
+    </svg>
+  );
+}
+
+function NpmIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="7" width="20" height="14" rx="2"/>
+      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+    </svg>
+  );
+}
+
+function ProdiIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+      <path d="M6 12v5c0 1.1 2.7 2 6 2s6-.9 6-2v-5"/>
+    </svg>
+  );
+}
+
+function CheckIcon({ color }) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 6L9 17l-5-5"/>
+    </svg>
   );
 }
 
