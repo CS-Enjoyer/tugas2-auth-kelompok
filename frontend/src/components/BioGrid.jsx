@@ -30,6 +30,10 @@ function BioGrid() {
       const data = response.data?.results ?? response.data ?? [];
       const enriched = data.map((m, i) => ({
         ...m,
+        avatar_url: m.avatar_url || m.photo || m.photo_url || m.image || m.foto || null,
+        npm: m.npm || m.student_id || '-',
+        is_member: true,
+        prodi: m.prodi || m.jurusan || (m.name.includes('Ismail') ? 'Sistem Informasi' : 'Ilmu Komputer'),
         theme_color: m.theme_color || MEMBER_COLORS[i % MEMBER_COLORS.length],
       }));
       setMembers(enriched);
