@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import Member
 
-# Register your models here.
+# Mendaftarkan tabel Member agar muncul di dashboard Admin
+admin.site.register(Member)
