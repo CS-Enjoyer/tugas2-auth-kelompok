@@ -79,16 +79,81 @@ function BioGrid() {
   };
 
   const getFallbackMembers = () => [
-    { id: 1, name: 'Anita Wijaya', email: 'anita@example.com', role: 'UI/UX Developer', avatar_url: 'https://via.placeholder.com/150?text=AW', phone: '+62812345678', is_member: true, theme_color: '#4CAF50' },
-    { id: 2, name: 'Budi Santoso', email: 'budi@example.com', role: 'Backend Developer', avatar_url: 'https://via.placeholder.com/150?text=BS', phone: '+62812345679', is_member: true, theme_color: '#2196F3' },
-    { id: 3, name: 'Citra Dewi', email: 'citra@example.com', role: 'Frontend Developer', avatar_url: 'https://via.placeholder.com/150?text=CD', phone: '+62812345680', is_member: true, theme_color: '#E91E63' },
-    { id: 4, name: 'Doni Prasetyo', email: 'doni@example.com', role: 'Database Admin', avatar_url: 'https://via.placeholder.com/150?text=DP', phone: '+62812345681', is_member: true, theme_color: '#FF9800' },
-    { id: 5, name: 'Eka Susanto', email: 'eka@example.com', role: 'QA Tester', avatar_url: 'https://via.placeholder.com/150?text=ES', phone: '+62812345682', is_member: false, theme_color: '#9C27B0' },
-    { id: 6, name: 'Fitri Handayani', email: 'fitri@example.com', role: 'Project Manager', avatar_url: 'https://via.placeholder.com/150?text=FH', phone: '+62812345683', is_member: true, theme_color: '#00BCD4' },
+    {
+      id: 1,
+      name: 'Anita Khoirun Nisa',
+      email: 'antkhrnns9@gmail.com',
+      role: 'UI/UX Developer',
+      npm: '2306152273',
+      prodi: 'Ilmu Komputer',
+      avatar_url: '',
+      is_member: true,
+      theme_color: '#4CAF50',
+    },
+    {
+      id: 2,
+      name: 'Ahmad Nizar Sauki',
+      email: 'anizarsauki@gmail.com',
+      role: 'Backend Developer',
+      npm: '2306152046',
+      prodi: 'Ilmu Komputer',
+      avatar_url: '',
+      is_member: true,
+      theme_color: '#2196F3',
+    },
+    {
+      id: 3,
+      name: 'Andi Aqsa Mappatunru Marzuki',
+      email: 'andiaqsa365@gmail.com',
+      role: 'Frontend Developer',
+      npm: '2306275046',
+      prodi: 'Ilmu Komputer',
+      avatar_url: '',
+      is_member: true,
+      theme_color: '#E91E63',
+    },
+    {
+      id: 4,
+      name: 'Affandi Shafwan Soleh',
+      email: 'affandishafwansoleh@gmail.com',
+      role: 'Database Admin',
+      npm: '2306245075',
+      prodi: 'Ilmu Komputer',
+      avatar_url: '',
+      is_member: true,
+      theme_color: '#FF9800',
+    },
+    {
+      id: 5,
+      name: 'Eka Susanto',
+      email: 'eka@example.com',
+      role: 'QA Tester',
+      npm: '2306152277',
+      prodi: 'Sistem Informasi',
+      avatar_url: '',
+      is_member: false,
+      theme_color: '#9C27B0',
+    },
+    {
+      id: 6,
+      name: 'Ismail Yanuar Anwas',
+      email: 'ismailyanuar1960@gmail.com',
+      role: 'Project Manager',
+      npm: '2306245781',
+      prodi: 'Sistem Informasi',
+      avatar_url: '',
+      is_member: true,
+      theme_color: '#00BCD4',
+    },
   ];
 
-  const activeColor = getComputedStyle(document.documentElement)
-    .getPropertyValue('--primary-color').trim() || '#4CAF50';
+  // Ambil active color dari CSS variable (mengikuti tema yang sedang aktif)
+  const activeColor =
+    (typeof window !== 'undefined' &&
+      getComputedStyle(document.documentElement)
+        .getPropertyValue('--primary-color')
+        .trim()) ||
+    '#4CAF50';
 
   if (loading) {
     return (
@@ -107,31 +172,34 @@ function BioGrid() {
 
       {/* Section Header */}
       <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div
-              className="w-1 h-6 rounded-full"
-              style={{ backgroundColor: activeColor }}
-            />
-            <h2 className="text-lg font-bold tracking-tight text-gray-800">
-              Daftar Admin & Tamu
-            </h2>
-          </div>
+        <div className="flex items-center gap-2">
+          <div
+            className="w-1 h-6 rounded-full"
+            style={{ backgroundColor: activeColor }}
+          />
+          <h2 className="text-lg font-bold tracking-tight text-gray-800">
+            Daftar Admin & Tamu
+          </h2>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Warna dot indicator per anggota */}
+          {/* Dot indicator warna per anggota */}
           <div className="flex gap-1">
             {members.map((m) => (
               <div
                 key={m.id}
                 onClick={() => handleSelectMember(m)}
-                className={`w-3 h-3 rounded-full transition-all duration-200 ${user?.is_member ? 'cursor-pointer hover:scale-125' : 'cursor-default opacity-50'}`}
+                className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                  user?.is_member
+                    ? 'cursor-pointer hover:scale-125'
+                    : 'cursor-default opacity-50'
+                }`}
                 style={{
                   backgroundColor: m.theme_color,
-                  boxShadow: selectedMember?.id === m.id
-                    ? `0 0 0 2px white, 0 0 0 3px ${m.theme_color}`
-                    : 'none',
+                  boxShadow:
+                    selectedMember?.id === m.id
+                      ? `0 0 0 2px white, 0 0 0 3px ${m.theme_color}`
+                      : 'none',
                 }}
                 title={user?.is_member ? `Ganti ke tema ${m.name}` : m.name}
               />
@@ -140,9 +208,15 @@ function BioGrid() {
 
           {selectedMember && (
             <button
-              onClick={() => { setSelectedMember(null); applyThemeColor(null); }}
+              onClick={() => {
+                setSelectedMember(null);
+                applyThemeColor(null);
+              }}
               className="text-xs px-3 py-1.5 rounded-full border font-medium transition-all duration-200 hover:opacity-80"
-              style={{ borderColor: selectedMember.theme_color, color: selectedMember.theme_color }}
+              style={{
+                borderColor: selectedMember.theme_color,
+                color: selectedMember.theme_color,
+              }}
             >
               ↺ Reset
             </button>
@@ -153,8 +227,8 @@ function BioGrid() {
       {/* Hint */}
       <p className="text-xs text-gray-300 mb-5 ml-3 italic">
         {user?.is_member
-          ? "Klik kartu untuk mengubah tema warna halaman"
-          : "Hanya Admin yang dapat mengubah tema warna halaman"}
+          ? 'Klik kartu untuk mengubah tema warna halaman'
+          : 'Hanya Admin yang dapat mengubah tema warna halaman'}
       </p>
 
       {/* Error banner */}
