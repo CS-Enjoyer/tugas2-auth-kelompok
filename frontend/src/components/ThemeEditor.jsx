@@ -78,17 +78,9 @@ function ThemeEditor() {
     setMessage(null);
 
     const token = localStorage.getItem('access_token');
-
-    // Jika sedang menggunakan akun dummy, simulasikan saja keberhasilannya
-    // Karena backend tidak mengenali 'dummy-token' untuk autentikasi yang sesungguhnya.
-    if (token === 'dummy-token') {
-      setTimeout(() => {
-        setMessage({
-          type: 'success',
-          text: '✓ [Dummy Mode] Tema berhasil disimpan secara lokal!',
-        });
-        setIsLoading(false);
-      }, 800);
+    if (!token) {
+      alert("Sesi Anda berakhir. Silakan login kembali.");
+      setIsLoading(false);
       return;
     }
 

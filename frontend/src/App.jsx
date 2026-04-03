@@ -6,160 +6,233 @@ import ThemeEditor from './components/ThemeEditor';
 import './styles/GlobalStyles.css';
 
 function App() {
-  const { user, loginWithGoogle, logout, loginDummy, loading } = useContext(AuthContext);
+  const { user, loginWithGoogle, logout, loading } = useContext(AuthContext);
 
   useEffect(() => {
     if (user && user.theme) {
       const { primary_color, primary_bg, primary_text, font_family } = user.theme;
       if (primary_color) document.documentElement.style.setProperty('--primary-color', primary_color);
-      if (primary_bg) document.documentElement.style.setProperty('--primary-bg', primary_bg);
-      if (primary_text) document.documentElement.style.setProperty('--primary-text', primary_text);
-      if (font_family) document.documentElement.style.setProperty('--font-family', font_family);
+      if (primary_bg)    document.documentElement.style.setProperty('--primary-bg', primary_bg);
+      if (primary_text)  document.documentElement.style.setProperty('--primary-text', primary_text);
+      if (font_family)   document.documentElement.style.setProperty('--font-family', font_family);
     }
   }, [user]);
 
   const handleSuccess = async (credentialResponse) => {
-    console.log("1. Token dari Google diterima!");
     const success = await loginWithGoogle(credentialResponse.credential);
-
-    if (success) {
-      console.log("2. Login backend berhasil!");
-    } else {
-      alert("Gagal memverifikasi login di server kita.");
-    }
+    if (!success) alert('Gagal memverifikasi login di server.');
   };
 
-  const handleError = () => {
-    console.log('Login Google Gagal');
-  };
-
-  // Tampilan saat pertama kali dimuat (mengecek sesi)
   if (loading) {
     return (
-      <div style={styles.loadingContainer}>
-        <p style={styles.loadingText}>⏳ Memuat data pengguna...</p>
+      <div style={s.loadingWrap}>
+        <div style={s.spinner} />
+        <p style={s.loadingText}>Memuat data pengguna...</p>
       </div>
     );
   }
 
   return (
-    <div style={styles.appContainer}>
-      {/* Header */}
-      <header style={styles.header}>
-        <div style={styles.headerContent}>
-          <h1 style={styles.title}>🎭 Tugas PKPL - Kelompok</h1>
+    <div style={s.app}>
+
+      {/* ── Header ── */}
+      <header style={s.header}>
+        <div style={s.headerInner}>
+          <div style={s.brand}>
+            <div style={s.brandDot} />
+            <span style={s.brandText}>Tugas PKPL — Kelompok</span>
+          </div>
+
           {user && (
-            <div style={styles.userInfo}>
-              <span>👤 {user.name || user.email}</span>
-              <button onClick={logout} style={styles.logoutBtn}>
-                Logout
-              </button>
+            <div style={s.userChip}>
+              <div style={s.avatar}>
+                {(user.name || user.email || '?')[0].toUpperCase()}
+              </div>
+              <span style={s.userName}>{user.name || user.email}</span>
+              <button onClick={logout} style={s.logoutBtn}>Logout</button>
             </div>
           )}
         </div>
       </header>
 
-      {/* Main Content */}
-      <main style={styles.main}>
-        {/* Jika belum login */}
-        {!user ? (
-          <div style={styles.loginSection}>
-            <div style={styles.loginCard}>
-              <h2>🔒 Silakan Login</h2>
-              <p style={styles.loginDescription}>
-                Login menggunakan akun Google untuk melihat biodata kelompok dan mengakses fitur lainnya.
-              </p>
-              <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
+      {/* ── Main ── */}
+      <main style={s.main}>
 
-              <div style={styles.dummyLoginSection}>
-                <p style={styles.dummyLoginText}>--- ATAU COBA DUMMY ---</p>
-                <div style={styles.dummyLoginButtons}>
-                  <button onClick={() => loginDummy('admin')} style={styles.adminDummyBtn}>
-                    🔑 Login Admin
-                  </button>
-                  <button onClick={() => loginDummy('guest')} style={styles.guestDummyBtn}>
-                    👤 Login Tamu
-                  </button>
-                </div>
+        {/* Login section */}
+        {!user ? (
+          <div style={s.loginWrap}>
+            {/* Decorative blobs */}
+            <div style={{ ...s.blob, top: '-60px', left: '-80px', background: 'rgba(76,175,80,0.12)' }} />
+            <div style={{ ...s.blob, bottom: '-40px', right: '-60px', background: 'rgba(33,150,243,0.1)', width: '260px', height: '260px' }} />
+
+            <div style={s.loginCard}>
+              {/* Icon */}
+              <div style={s.lockIcon}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color,#4CAF50)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
               </div>
+
+              <h2 style={s.loginTitle}>Silakan Login</h2>
+              <p style={s.loginSub}>
+                Masuk dengan akun Google untuk melihat biodata kelompok dan mengakses fitur lainnya.
+              </p>
+
+              <div style={s.divider} />
+
+              <div style={s.googleWrap}>
+                <GoogleLogin
+                  onSuccess={handleSuccess}
+                  onError={() => console.log('Login Google Gagal')}
+                  width="320"
+                />
+              </div>
+
+              <p style={s.loginNote}>
+                Akses terbatas hanya untuk anggota kelompok dan tamu terdaftar.
+              </p>
             </div>
           </div>
         ) : (
-          /* Jika sudah login, cek status role-nya */
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
-            {user.is_member ? (
-              <div style={styles.memberStatus}>
-                <h3>✔️ Status: Admin</h3>
-                <p>Anda memiliki akses penuh kepada semua fitur, termasuk editor tema.</p>
-              </div>
-            ) : (
-              <div style={styles.guestStatus}>
-                <h3>👤 Status: Tamu</h3>
-                <p>Anda dapat melihat biodata kelompok namun tidak dapat mengubah tema.</p>
-              </div>
-            )}
+          /* Status banner */
+          <div style={user.is_member ? s.bannerAdmin : s.bannerGuest}>
+            <div style={s.bannerDot(user.is_member)} />
+            <div>
+              <p style={s.bannerTitle}>
+                {user.is_member ? 'Status: Admin' : 'Status: Tamu'}
+              </p>
+              <p style={s.bannerDesc}>
+                {user.is_member
+                  ? 'Anda memiliki akses penuh, termasuk editor tema website.'
+                  : 'Anda dapat melihat biodata kelompok namun tidak dapat mengubah tema.'}
+              </p>
+            </div>
           </div>
         )}
 
-        {/* Biodata Grid - Ditampilkan untuk semua user */}
+        {/* Bio Grid */}
         <BioGrid />
 
-        {/* Theme Editor - HANYA ditampikan jika user adalah member kelompok */}
+        {/* Theme Editor (admin only) */}
         {user?.is_member && <ThemeEditor />}
       </main>
 
-      {/* Footer */}
-      <footer style={styles.footer}>
-        <p>© 2026 Kelompok PKPL. Semua hak dilindungi.</p>
+      {/* ── Footer ── */}
+      <footer style={s.footer}>
+        <p style={s.footerText}>© 2026 Kelompok PKPL · Semua hak dilindungi</p>
       </footer>
     </div>
   );
 }
 
-// ----- Styles -----
-// (Saya buatkan ulang full styling-nya agar tampilan UI dari temanmu tetap rapi 
-// saat kamu copy-paste keseluruhan file ini)
-const styles = {
-  appContainer: {
+// ── Styles ──────────────────────────────────────────────────
+
+const PRIMARY = 'var(--primary-color, #4CAF50)';
+const PRIMARY_BG = 'var(--primary-bg, #ffffff)';
+const PRIMARY_TEXT = 'var(--primary-text, #1a1a1a)';
+
+const s = {
+  app: {
     minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',
-    fontFamily: 'var(--font-family, sans-serif)',
-    backgroundColor: 'var(--primary-bg, #121212)',
-    color: 'var(--primary-text, #ffffff)',
+    fontFamily: "var(--font-family, 'Segoe UI', sans-serif)",
+    backgroundColor: '#f5f6fa',
+    color: PRIMARY_TEXT,
   },
-  loadingContainer: {
+
+  // Loading
+  loadingWrap: {
     display: 'flex',
+    flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
     height: '100vh',
-    backgroundColor: '#121212',
-    color: '#fff',
+    gap: '16px',
+    backgroundColor: '#f5f6fa',
   },
-  loadingText: { fontSize: '1.2rem' },
+  spinner: {
+    width: '40px',
+    height: '40px',
+    border: `4px solid rgba(76,175,80,0.2)`,
+    borderTop: `4px solid #4CAF50`,
+    borderRadius: '50%',
+    animation: 'spin 0.9s linear infinite',
+  },
+  loadingText: { fontSize: '14px', color: '#888', margin: 0 },
+
+  // Header
   header: {
-    backgroundColor: '#1e1e1e',
-    padding: '1rem 2rem',
-    borderBottom: '1px solid #333',
+    backgroundColor: '#ffffff',
+    borderBottom: '1px solid #ebebeb',
+    padding: '0 2rem',
+    height: '64px',
+    display: 'flex',
+    alignItems: 'center',
+    position: 'sticky',
+    top: 0,
+    zIndex: 100,
+    boxShadow: '0 1px 8px rgba(0,0,0,0.06)',
   },
-  headerContent: {
+  headerInner: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    width: '100%',
     maxWidth: '1200px',
     margin: '0 auto',
   },
-  title: { margin: 0, fontSize: '1.5rem' },
-  userInfo: { display: 'flex', alignItems: 'center', gap: '1rem' },
-  logoutBtn: {
-    padding: '8px 16px',
-    backgroundColor: '#dc3545',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontWeight: 'bold'
+  brand: { display: 'flex', alignItems: 'center', gap: '10px' },
+  brandDot: {
+    width: '10px',
+    height: '10px',
+    borderRadius: '50%',
+    backgroundColor: PRIMARY,
+    flexShrink: 0,
   },
+  brandText: {
+    fontWeight: '700',
+    fontSize: '16px',
+    color: '#1a1a1a',
+    letterSpacing: '-0.3px',
+  },
+  userChip: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    backgroundColor: '#f5f6fa',
+    padding: '6px 6px 6px 6px',
+    borderRadius: '40px',
+    border: '1px solid #ebebeb',
+  },
+  avatar: {
+    width: '30px',
+    height: '30px',
+    borderRadius: '50%',
+    backgroundColor: PRIMARY,
+    color: '#fff',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontWeight: '700',
+    fontSize: '13px',
+    flexShrink: 0,
+  },
+  userName: { fontSize: '13px', fontWeight: '500', color: '#333', paddingRight: '4px' },
+  logoutBtn: {
+    padding: '6px 14px',
+    backgroundColor: '#fff',
+    color: '#e53935',
+    border: '1px solid #ffd0d0',
+    borderRadius: '20px',
+    cursor: 'pointer',
+    fontWeight: '600',
+    fontSize: '12px',
+    transition: 'all 0.2s',
+  },
+
+  // Main
   main: {
     flex: 1,
     padding: '2rem',
@@ -168,60 +241,124 @@ const styles = {
     width: '100%',
     boxSizing: 'border-box',
   },
-  loginSection: { display: 'flex', justifyContent: 'center', marginTop: '3rem', marginBottom: '3rem' },
+
+  // Login
+  loginWrap: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginTop: '3rem',
+    marginBottom: '3rem',
+    position: 'relative',
+  },
+  blob: {
+    position: 'absolute',
+    width: '300px',
+    height: '300px',
+    borderRadius: '50%',
+    filter: 'blur(60px)',
+    pointerEvents: 'none',
+    zIndex: 0,
+  },
   loginCard: {
-    backgroundColor: '#1e1e1e',
-    padding: '2.5rem',
-    borderRadius: '8px',
-    border: '1px solid #333',
+    position: 'relative',
+    zIndex: 1,
+    backgroundColor: '#ffffff',
+    padding: '40px 36px',
+    borderRadius: '20px',
+    border: '1px solid #ebebeb',
     textAlign: 'center',
-    maxWidth: '400px',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
+    maxWidth: '420px',
+    width: '100%',
+    boxShadow: '0 8px 40px rgba(0,0,0,0.08)',
   },
-  loginDescription: { color: '#aaa', marginBottom: '2rem' },
-  dummyLoginSection: { marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #333' },
-  dummyLoginText: { color: '#666', fontSize: '0.8rem', marginBottom: '1rem', letterSpacing: '1px' },
-  dummyLoginButtons: { display: 'flex', flexDirection: 'column', gap: '0.8rem' },
-  adminDummyBtn: {
-    padding: '10px',
-    backgroundColor: '#198754',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontWeight: 'bold',
-    transition: 'all 0.2s'
+  lockIcon: {
+    width: '60px',
+    height: '60px',
+    borderRadius: '16px',
+    backgroundColor: 'rgba(76,175,80,0.08)',
+    border: '1px solid rgba(76,175,80,0.2)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: '0 auto 20px',
   },
-  guestDummyBtn: {
-    padding: '10px',
-    backgroundColor: '#6c757d',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontWeight: 'bold',
-    transition: 'all 0.2s'
+  loginTitle: {
+    margin: '0 0 10px',
+    fontSize: '22px',
+    fontWeight: '700',
+    color: '#1a1a1a',
   },
-  memberStatus: {
-    backgroundColor: 'rgba(76, 175, 80, 0.1)',
-    border: '1px solid #4caf50',
-    padding: '1rem',
-    borderRadius: '8px',
+  loginSub: {
+    margin: '0 0 20px',
+    fontSize: '14px',
+    color: '#777',
+    lineHeight: 1.6,
   },
-  guestStatus: {
-    backgroundColor: 'rgba(255, 152, 0, 0.1)',
-    border: '1px solid #ff9800',
-    padding: '1rem',
-    borderRadius: '8px',
+  divider: {
+    height: '1px',
+    background: '#f0f0f0',
+    margin: '20px 0',
   },
+  googleWrap: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginBottom: '16px',
+  },
+  loginNote: {
+    margin: 0,
+    fontSize: '12px',
+    color: '#bbb',
+  },
+
+  // Status banners
+  bannerAdmin: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '14px',
+    backgroundColor: '#f0faf1',
+    border: '1px solid #b6e5b8',
+    padding: '14px 18px',
+    borderRadius: '12px',
+    marginBottom: '8px',
+  },
+  bannerGuest: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '14px',
+    backgroundColor: '#fff8f0',
+    border: '1px solid #ffd9a8',
+    padding: '14px 18px',
+    borderRadius: '12px',
+    marginBottom: '8px',
+  },
+  bannerDot: (isAdmin) => ({
+    width: '10px',
+    height: '10px',
+    borderRadius: '50%',
+    backgroundColor: isAdmin ? '#4CAF50' : '#FF9800',
+    flexShrink: 0,
+    marginTop: '4px',
+  }),
+  bannerTitle: {
+    margin: '0 0 2px',
+    fontWeight: '700',
+    fontSize: '14px',
+    color: '#1a1a1a',
+  },
+  bannerDesc: {
+    margin: 0,
+    fontSize: '13px',
+    color: '#666',
+  },
+
+  // Footer
   footer: {
     textAlign: 'center',
-    padding: '1rem',
-    backgroundColor: '#1e1e1e',
-    borderTop: '1px solid #333',
-    fontSize: '0.9rem',
-    color: '#888',
+    padding: '1.2rem',
+    backgroundColor: '#ffffff',
+    borderTop: '1px solid #ebebeb',
   },
+  footerText: { margin: 0, fontSize: '13px', color: '#aaa' },
 };
 
 export default App;
