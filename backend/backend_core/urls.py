@@ -15,8 +15,19 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from .views import ThemeUpdateView, GoogleLoginView
+from anggota.views import MemberListView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('accounts/', include('allauth.urls')),
+
+    path('api/members/', MemberListView.as_view(), name='member-list'),
+    
+    # Endpoint API untuk fitur ganti tema
+    path('api/update-theme/', ThemeUpdateView.as_view(), name='update-theme'),
+
+    # Endpoint untuk login via React
+    path('api/auth/google/', GoogleLoginView.as_view(), name='google_login'),
 ]
