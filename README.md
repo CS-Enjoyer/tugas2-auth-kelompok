@@ -1,33 +1,45 @@
-# Web Monorepo Setup Guide
+# 🗂️ Web Monorepo
 
-Selamat datang di proyek web monorepo (React & Django). Ikuti panduan di bawah ini untuk memulai pengembangan di environment lokal.
+![React](https://img.shields.io/badge/React-18+-61DAFB?style=flat-square&logo=react&logoColor=black)
+![Django](https://img.shields.io/badge/Django-Python_3.10+-092E20?style=flat-square&logo=django&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=flat-square&logo=supabase&logoColor=black)
+![Node](https://img.shields.io/badge/Node.js-18+-339933?style=flat-square&logo=node.js&logoColor=white)
 
-## Prasyarat
-- Node.js (v18+)
-- Python (v3.10+)
-- PostgreSQL
-
----
-
-## 1. Setup Database PostgreSQL
-
-1. Buka PostgreSQL lokal Anda (pgAdmin atau cli `psql`).
-2. Buat database baru untuk proyek ini (misalnya `backend_core_db`).
-   ```sql
-   CREATE DATABASE backend_core_db;
-   ```
+> Setup guide untuk pengembangan lokal — frontend **React** + backend **Django** + database **Supabase (PostgreSQL)**
 
 ---
 
-## 2. Setup Backend (Django)
+## 🧰 Tech Stack
 
-Masuk ke folder backend:
+| Layer | Teknologi | Port |
+|---|---|---|
+| Frontend | React 18+ (Vite) | `:5173` |
+| Backend | Django (Python 3.10+) | `:8000` |
+| Database | PostgreSQL via Supabase | `:6543` |
+
+---
+
+## ✅ Prasyarat
+
+Pastikan tools berikut sudah terinstal sebelum memulai:
+
+- **Node.js** v18+
+- **Python** v3.10+
+- **pip**
+- **npm**
+- Akses ke **Supabase project**
+
+---
+
+## 01 — Setup Backend (Django)
+
+### Masuk ke folder backend
+
 ```bash
 cd backend
 ```
 
-### Mengaktifkan Virtual Environment
-Buka terminal dan buat virtual environment (jika belum ada) lalu aktifkan:
+### Buat & aktifkan Virtual Environment
 
 **Windows:**
 ```bash
@@ -35,62 +47,89 @@ python -m venv venv
 .\venv\Scripts\activate
 ```
 
-**macOS/Linux:**
+**macOS / Linux:**
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
 
-### Instalasi Dependencies
-Setelah virtual environment aktif, jalankan:
+### Instalasi dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### Konfigurasi Environment Variables
-Salin template `.env.example` menjadi `.env` dan gunakan isian database yang sudah Anda siapkan:
-```bash
-cp .env.example .env
-```
-Contoh isi `.env`:
+### Konfigurasi file `.env`
+
+Buat file `.env` di dalam folder `backend/` dan isi dengan nilai berikut:
+
 ```env
-DB_NAME=backend_core_db
-DB_USER=postgres
-DB_PASSWORD=rahasia
-DB_HOST=localhost
-DB_PORT=5432
+DB_NAME=postgres
+DB_USER=postgres.mqsreerzzrkhtqzkmlsp
+DB_PASSWORD=B7CkuuTrwndDbXYE
+DB_HOST=aws-1-ap-southeast-1.pooler.supabase.com
+DB_PORT=6543
 ```
 
-### Menjalankan Migrasi Django
-Migrasi skema database ke PostgreSQL:
+### Migrasi database
+
 ```bash
 python manage.py makemigrations
 python manage.py migrate
 ```
 
-Jalankan server Django:
+### Jalankan server Django
+
 ```bash
 python manage.py runserver
 ```
 
+> ✅ API tersedia di **http://localhost:8000**
+
 ---
 
-## 3. Setup Frontend (React)
+## 02 — Setup Frontend (React)
 
-Buka terminal baru, dan masuk ke folder frontend:
+> 💡 Buka **terminal baru** — biarkan server Django tetap berjalan.
+
+### Masuk ke folder frontend
+
 ```bash
 cd frontend
 ```
 
-### Instalasi Node Modules
-Jalankan perintah berikut untuk menginstal semua dependency React:
+### Instalasi node modules
+
 ```bash
 npm install
 ```
 
-### Menjalankan Development Server
+### Jalankan dev server
+
 ```bash
 npm run dev
 ```
 
-Platform frontend sekarang dapat diakses melalui browser sesuai dengan alamat lokal yang muncul di terminal (biasanya `http://localhost:5173`).
+> ✅ Frontend berjalan di **http://localhost:5173**
+
+---
+
+## 🚀 Quick Start (Ringkasan)
+
+```bash
+# Terminal 1 — Backend
+cd backend
+python3 -m venv venv && source venv/bin/activate   # atau .\venv\Scripts\activate di Windows
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+
+# Terminal 2 — Frontend
+cd frontend
+npm install
+npm run dev
+```
+
+---
+
+> Pastikan kedua server berjalan **bersamaan** di terminal terpisah.
